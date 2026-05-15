@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alérgenos · Carta</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF7F2;
+    --surface: #FFFFFF;
+    --surface2: #F3EFE8;
+    --border: #E5DDD0;
+    --text: #1A1208;
+    --text-muted: #7A6E5F;
+    --accent: #C4521A;
+    --accent-light: #FAEEE6;
+    --green: #2D6A4F;
+    --green-light: #E8F5EE;
+    --red: #B91C1C;
+    --red-light: #FEE2E2;
+    --blue: #1E4E8C;
+    --blue-light: #EBF2FC;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--text); color: #FAF7F2;
+    padding: 0 28px; display: flex; align-items: center; justify-content: space-between;
+    height: 58px; position: sticky; top: 0; z-index: 300;
+  }
+  header h1 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; letter-spacing: 0.02em; }
+  .mode-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px; padding: 6px 14px; font-size: 0.75rem; color: #D4C9B8;
+    cursor: pointer; transition: all 0.2s; user-select: none;
+  }
+  .mode-pill:hover { background: rgba(255,255,255,0.18); }
+  .mode-pill.admin-active { background: var(--accent); border-color: var(--accent); color: white; }
+  .mode-dot { width: 7px; height: 7px; border-radius: 50%; background: #6B8C6B; transition: background 0.2s; }
+  .mode-pill.admin-active .mode-dot { background: #FFD580; }
+
+  /* ── TABS ── */
+  .tabs { display: flex; background: var(--surface2); border-bottom: 1px solid var(--border); padding: 0 24px; overflow-x: auto; }
+  .tab {
+    padding: 13px 18px; font-size: 0.8rem; font-weight: 500; color: var(--text-muted);
+    border-bottom: 2.5px solid transparent; cursor: pointer; transition: all 0.18s;
+    letter-spacing: 0.03em; white-space: nowrap; flex-shrink: 0;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab:hover:not(.active) { color: var(--text); }
+  .tab.hidden { display: none; }
+
+  /* ── VIEWS ── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ══════════════ CONSULTA ══════════════ */
+  .layout { display: grid; grid-template-columns: 1fr 1fr; height: calc(100vh - 101px); }
+  .panel { overflow-y: auto; padding: 22px 26px; border-right: 1px solid var(--border); }
+  .panel:last-child { border-right: none; }
+  .panel::-webkit-scrollbar { width: 4px; }
+  .panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .panel-title { font-family: 'DM Serif Display', serif; font-size: 1.05rem; margin-bottom: 3px; display: flex; align-items: center; gap: 8px; }
+  .panel-sub { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; }
+  .search-wrap { position: relative; margin-bottom: 14px; }
+  .search-wrap input { width: 100%; padding: 10px 14px 10px 38px; border: 1.5px solid var(--border); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; background: var(--surface); color: var(--text); outline: none; transition: border-color 0.2s; }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-wrap .ico { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+  .plato-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 11px; padding: 13px 15px; margin-bottom: 8px; cursor: pointer; transition: all 0.16s; }
+  .plato-card:hover, .plato-card.active { border-color: var(--accent); background: var(--accent-light); transform: translateX(3px); }
+  .plato-card.active { box-shadow: 0 2px 10px rgba(196,82,26,0.1); }
+  .plato-cat { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 3px; }
+  .plato-nom { font-weight: 600; font-size: 0.9rem; margin-bottom: 7px; }
+  .badges { display: flex; flex-wrap: wrap; gap: 4px; }
+  .badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 20px; font-size: 0.63rem; font-weight: 500; color: white; white-space: nowrap; }
+  .sin-ale { font-size: 0.7rem; color: var(--green); background: var(--green-light); padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .detalle-box { background: var(--surface); border: 1.5px solid var(--border); border-radius: 13px; padding: 18px; margin-top: 16px; }
+  .det-nombre { font-family: 'DM Serif Display', serif; font-size: 1.25rem; margin-bottom: 2px; }
+  .det-cat { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 12px; }
+  .sec-label { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 7px; margin-top: 10px; }
+  .ale-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 6px; }
+  .ale-pill { display: flex; align-items: center; gap: 5px; padding: 6px 9px; border-radius: 8px; font-size: 0.73rem; font-weight: 500; }
+  .ale-pill.ausente { background: var(--surface2); color: var(--text-muted); opacity: 0.45; }
+  .ale-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .nota-box { background: #FFF8E7; border: 1.5px solid #F0D080; border-radius: 10px; padding: 10px 13px; font-size: 0.73rem; color: #7A5F10; margin-bottom: 14px; }
+  .ale-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 18px; }
+  .ale-btn { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 9px; border: 1.5px solid var(--border); background: var(--surface); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.75rem; font-weight: 500; color: var(--text); transition: all 0.14s; text-align: left; }
+  .ale-btn:hover { transform: translateY(-1px); }
+  .ale-btn.sel { color: white !important; border-color: transparent; }
+  .ale-btn .bdot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .res-title { font-family: 'DM Serif Display', serif; font-size: 0.92rem; margin-bottom: 9px; padding-bottom: 7px; border-bottom: 1.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .cnt-badge { background: var(--accent); color: white; font-family: 'DM Sans', sans-serif; font-size: 0.7rem; font-weight: 600; padding: 1px 8px; border-radius: 20px; }
+  .plato-row { display: flex; justify-content: space-between; align-items: center; background: var(--surface); border: 1.5px solid var(--border); border-radius: 9px; padding: 10px 13px; margin-bottom: 6px; }
+  .plato-row .nom { font-weight: 600; font-size: 0.85rem; }
+  .plato-row .cat2 { font-size: 0.66rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+  .empty-state { text-align: center; padding: 32px 20px; color: var(--text-muted); font-size: 0.83rem; }
+
+  /* ══════════════ INGREDIENTES CONSULTA ══════════════ */
+  .ing-view { padding: 24px 28px; max-width: 1100px; margin: 0 auto; }
+  .ing-search-row { display: flex; gap: 10px; margin-bottom: 20px; }
+  .ing-search-row .search-wrap { flex: 1; margin-bottom: 0; }
+  .familia-tabs { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 20px; }
+  .ftab { padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--surface); font-size: 0.75rem; font-weight: 500; cursor: pointer; transition: all 0.14s; color: var(--text-muted); }
+  .ftab:hover { border-color: var(--text-muted); color: var(--text); }
+  .ftab.active { background: var(--text); border-color: var(--text); color: white; }
+  .ing-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .ing-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 15px 17px; transition: box-shadow 0.16s; }
+  .ing-card:hover { box-shadow: 0 3px 14px rgba(0,0,0,0.07); }
+  .ing-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .ing-nombre { font-weight: 600; font-size: 0.9rem; }
+  .ing-familia { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-top: 1px; }
+  .ing-tags { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+  .tag-marca { font-size: 0.7rem; background: var(--blue-light); color: var(--blue); padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .tag-env { font-size: 0.7rem; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .tag-env.si { background: var(--green-light); color: var(--green); }
+  .tag-env.no { background: var(--surface2); color: var(--text-muted); }
+  .ing-ales { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 9px; }
+
+  /* ══════════════ ADMIN ══════════════ */
+  .admin-page { padding: 26px 30px; max-width: 980px; margin: 0 auto; }
+  .admin-section { margin-bottom: 42px; }
+  .admin-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--border); }
+  .admin-section-header h2 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; }
+  .admin-section-header p { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+  .btn-primary { background: var(--accent); color: white; border: none; border-radius: 9px; padding: 9px 16px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.16s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-primary:hover { background: #B8470F; transform: translateY(-1px); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1.5px solid var(--border); border-radius: 9px; padding: 9px 14px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.14s; }
+  .btn-secondary:hover { border-color: var(--text-muted); }
+  .btn-danger { background: var(--red-light); color: var(--red); border: 1.5px solid #FECACA; border-radius: 7px; padding: 5px 9px; font-family: 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 600; cursor: pointer; transition: all 0.14s; }
+  .btn-danger:hover { background: var(--red); color: white; }
+  .btn-edit { background: var(--surface2); color: var(--text); border: 1.5px solid var(--border); border-radius: 7px; padding: 5px 9px; font-family: 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 600; cursor: pointer; transition: all 0.14s; }
+  .btn-edit:hover { border-color: var(--accent); color: var(--accent); }
+  .admin-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 12px; overflow: hidden; border: 1.5px solid var(--border); }
+  .admin-table th { text-align: left; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); padding: 10px 14px; background: var(--surface2); border-bottom: 1.5px solid var(--border); font-weight: 600; }
+  .admin-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 0.83rem; }
+  .admin-table tr:last-child td { border-bottom: none; }
+  .admin-table tr:hover td { background: var(--surface2); }
+  .td-acc { display: flex; gap: 5px; justify-content: flex-end; }
+
+  /* familias chips */
+  .familias-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .familia-chip { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.8rem; font-weight: 500; }
+  .familia-chip button { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 0.85rem; padding: 0; line-height: 1; transition: color 0.14s; }
+  .familia-chip button:hover { color: var(--red); }
+  .add-familia-row { display: flex; gap: 8px; margin-top: 10px; }
+  .add-familia-row input { flex: 1; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; outline: none; transition: border-color 0.18s; background: var(--surface); }
+  .add-familia-row input:focus { border-color: var(--accent); }
+
+  /* ── MODAL ── */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  .overlay.open { opacity: 1; pointer-events: all; }
+  .modal { background: var(--surface); border-radius: 16px; padding: 26px; width: 100%; max-width: 580px; max-height: 88vh; overflow-y: auto; transform: translateY(10px); transition: transform 0.2s; }
+  .overlay.open .modal { transform: translateY(0); }
+  .modal::-webkit-scrollbar { width: 4px; }
+  .modal::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .modal h3 { font-family: 'DM Serif Display', serif; font-size: 1.25rem; margin-bottom: 18px; }
+  .form-group { margin-bottom: 14px; }
+  .form-label { display: block; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 5px; }
+  .form-input { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.18s; }
+  .form-input:focus { border-color: var(--accent); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .radio-group { display: flex; gap: 8px; }
+  .radio-opt { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 0.82rem; font-weight: 500; transition: all 0.14s; user-select: none; }
+  .radio-opt input { display: none; }
+  .radio-opt.sel { background: var(--green-light); border-color: var(--green); color: var(--green); }
+  .radio-opt.sel-no { background: var(--surface2); border-color: var(--text-muted); color: var(--text-muted); }
+  .ale-checks { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px; }
+  .ale-check-item { display: flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.14s; user-select: none; font-size: 0.76rem; }
+  .ale-check-item:hover { border-color: var(--text-muted); }
+  .ale-check-item.checked { border-color: transparent; color: white; }
+  .ale-check-item input[type=checkbox] { display: none; }
+  .modal-footer { display: flex; gap: 9px; justify-content: flex-end; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 16px; }
+  .admin-empty { text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.85rem; background: var(--surface); border-radius: 12px; border: 1.5px solid var(--border); }
+  select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237A6E5F' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🍽 Alérgenos · Carta</h1>
+  <div class="mode-pill" id="mode-toggle" onclick="toggleMode()">
+    <div class="mode-dot"></div>
+    <span id="mode-label">Modo consulta</span>
+  </div>
+</header>
+
+<div class="tabs" id="tabs">
+  <div class="tab active"   onclick="showTab('platos')">📋 Por plato</div>
+  <div class="tab"          onclick="showTab('ingredientes')">🧄 Por ingrediente</div>
+  <div class="tab hidden"   onclick="showTab('admin-platos')"     id="tab-ap">⚙️ Platos</div>
+  <div class="tab hidden"   onclick="showTab('admin-ing')"        id="tab-ai">🧄 Ingredientes</div>
+  <div class="tab hidden"   onclick="showTab('admin-familias')"   id="tab-af">🗂 Familias</div>
+  <div class="tab hidden"   onclick="showTab('admin-backup')"     id="tab-ab">💾 Copia de seguridad</div>
+</div>
+
+<!-- ═══════ VIEW: CONSULTA PLATOS ═══════ -->
+<div class="view active" id="view-platos">
+  <div class="layout">
+    <div class="panel">
+      <div class="panel-title">🗒 Por plato</div>
+      <div class="panel-sub">Toca un plato para ver sus alérgenos</div>
+      <div class="search-wrap">
+        <svg class="ico" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="q-platos" placeholder="Buscar plato o categoría…" oninput="renderPlatos()">
+      </div>
+      <div id="lista-platos"></div>
+      <div id="detalle-plato" style="display:none">
+        <div class="sec-label">Detalle</div>
+        <div class="detalle-box">
+          <div class="det-nombre" id="det-nombre"></div>
+          <div class="det-cat" id="det-cat"></div>
+          <div class="sec-label">CONTIENE</div>
+          <div class="ale-grid" id="det-grid"></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">⚠️ Por alérgeno</div>
+      <div class="panel-sub">Selecciona un alérgeno para filtrar platos</div>
+      <div class="nota-box">⚠️ Informa siempre al cliente de posibles trazas. Consulta con cocina ante dudas de contaminación cruzada.</div>
+      <div class="ale-selector" id="ale-selector"></div>
+      <div id="res-alergeno"><div class="empty-state">Selecciona un alérgeno para ver los platos afectados</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ VIEW: CONSULTA INGREDIENTES ═══════ -->
+<div class="view" id="view-ingredientes">
+  <div class="ing-view">
+    <div class="ing-search-row">
+      <div class="search-wrap">
+        <svg class="ico" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="q-ing" placeholder="Buscar ingrediente o marca…" oninput="renderIngredientes()">
+      </div>
+    </div>
+    <div class="familia-tabs" id="familia-tabs-consulta"></div>
+    <div id="ing-grid" class="ing-grid"></div>
+  </div>
+</div>
+
+<!-- ═══════ VIEW: ADMIN PLATOS ═══════ -->
+<div class="view" id="view-admin-platos">
+  <div class="admin-page">
+    <div class="admin-section-header">
+      <div><h2>Gestionar platos</h2><p style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">Los datos se guardan en este dispositivo</p></div>
+      <button class="btn-primary" onclick="abrirModalPlato()">+ Añadir plato</button>
+    </div>
+    <div id="admin-platos-content"></div>
+  </div>
+</div>
+
+<!-- ═══════ VIEW: ADMIN INGREDIENTES ═══════ -->
+<div class="view" id="view-admin-ing">
+  <div class="admin-page">
+    <div class="admin-section-header">
+      <div><h2>Gestionar ingredientes</h2><p style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">Ingredientes agrupados por familia</p></div>
+      <button class="btn-primary" onclick="abrirModalIng()">+ Añadir ingrediente</button>
+    </div>
+    <div id="admin-ing-content"></div>
+  </div>
+</div>
+
+<!-- ═══════ VIEW: ADMIN FAMILIAS ═══════ -->
+<div class="view" id="view-admin-familias">
+  <div class="admin-page">
+    <div class="admin-section-header">
+      <div><h2>Familias de ingredientes</h2><p style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">Crea y elimina familias para organizar los ingredientes</p></div>
+    </div>
+    <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:22px;">
+      <div class="familias-list" id="familias-list"></div>
+      <div class="add-familia-row">
+        <input type="text" id="nueva-familia" placeholder="Nueva familia (ej: Lácteos, Pescados, Especias…)" onkeydown="if(event.key==='Enter')agregarFamilia()">
+        <button class="btn-primary" onclick="agregarFamilia()">+ Añadir</button>
+      </div>
+    </div>
+    <div style="background:#FFF8E7;border:1.5px solid #F0D080;border-radius:10px;padding:12px 16px;font-size:0.76rem;color:#7A5F10;margin-top:16px;">
+      💡 Si eliminas una familia, los ingredientes que pertenezcan a ella pasarán a «Sin familia».
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ VIEW: ADMIN BACKUP ═══════ -->
+<div class="view" id="view-admin-backup">
+  <div class="admin-page">
+    <div class="admin-section-header">
+      <div><h2>Copia de seguridad</h2><p style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">Exporta tus datos para guardarlos en Google Drive o donde prefieras</p></div>
+    </div>
+
+    <!-- EXPORTAR -->
+    <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px;">
+      <div style="display:flex;align-items:flex-start;gap:18px;">
+        <div style="font-size:2.2rem;line-height:1">📤</div>
+        <div style="flex:1">
+          <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:4px">Exportar datos</div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:16px;line-height:1.5">
+            Descarga un archivo <strong>backup-alergenos.json</strong> con todos tus platos, ingredientes y familias. Guárdalo en Google Drive, en el correo o donde quieras como copia de seguridad.
+          </p>
+          <div style="background:var(--surface2);border-radius:10px;padding:12px 16px;font-size:0.78rem;color:var(--text-muted);margin-bottom:16px;line-height:1.6">
+            <strong style="color:var(--text)">El archivo incluirá:</strong><br>
+            <span id="backup-resumen">—</span>
+          </div>
+          <button class="btn-primary" onclick="exportarDatos()" style="gap:8px">
+            📥 Descargar backup-alergenos.json
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- IMPORTAR -->
+    <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px;">
+      <div style="display:flex;align-items:flex-start;gap:18px;">
+        <div style="font-size:2.2rem;line-height:1">📥</div>
+        <div style="flex:1">
+          <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:4px">Importar datos</div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:16px;line-height:1.5">
+            Carga un archivo <strong>backup-alergenos.json</strong> para restaurar todos los datos. Útil si cambias de tablet o de navegador.<br>
+            <span style="color:var(--red);font-weight:600">⚠️ Esto reemplazará todos los datos actuales.</span>
+          </p>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <label style="display:inline-flex;align-items:center;gap:8px;background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:9px 16px;font-size:0.82rem;font-weight:500;cursor:pointer;transition:all 0.14s" onmouseover="this.style.borderColor='var(--text-muted)'" onmouseout="this.style.borderColor='var(--border)'">
+              📂 Seleccionar archivo…
+              <input type="file" accept=".json" id="import-file" style="display:none" onchange="previewImport(event)">
+            </label>
+            <span id="import-filename" style="font-size:0.78rem;color:var(--text-muted)">Ningún archivo seleccionado</span>
+          </div>
+          <div id="import-preview" style="display:none;margin-top:14px;background:var(--green-light);border:1.5px solid var(--green);border-radius:10px;padding:12px 16px;font-size:0.78rem;color:var(--green);line-height:1.6"></div>
+          <div id="import-error"   style="display:none;margin-top:14px;background:var(--red-light);border:1.5px solid #FECACA;border-radius:10px;padding:12px 16px;font-size:0.78rem;color:var(--red);line-height:1.6"></div>
+          <button id="btn-importar" class="btn-primary" onclick="importarDatos()" style="margin-top:14px;display:none;background:var(--green)">
+            ✅ Confirmar importación
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSTRUCCIONES DRIVE -->
+    <div style="background:#EBF2FC;border:1.5px solid #BFDBFE;border-radius:14px;padding:20px;">
+      <div style="font-family:'DM Serif Display',serif;font-size:1rem;margin-bottom:12px;color:var(--blue)">☁️ Cómo guardar en Google Drive</div>
+      <ol style="font-size:0.8rem;color:#1E4E8C;line-height:2;padding-left:18px">
+        <li>Pulsa <strong>Descargar backup-alergenos.json</strong> — el archivo se guardará en la carpeta Descargas de la tablet</li>
+        <li>Abre la app de <strong>Google Drive</strong> en la tablet</li>
+        <li>Pulsa el botón <strong>+</strong> y elige <em>Subir archivo</em></li>
+        <li>Selecciona el archivo <strong>backup-alergenos.json</strong> de Descargas</li>
+        <li>¡Listo! Ya tienes la copia en la nube 🎉</li>
+      </ol>
+      <p style="font-size:0.75rem;color:#3B6AAD;margin-top:10px">💡 Recomendamos hacer una copia cada vez que añadas platos o ingredientes nuevos.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MODAL PLATO ═══════ -->
+<div class="overlay" id="overlay-plato" onclick="cerrarOverlay(event,'overlay-plato')">
+  <div class="modal">
+    <h3 id="mp-titulo">Añadir plato</h3>
+    <div class="form-group">
+      <label class="form-label">Nombre del plato *</label>
+      <input class="form-input" id="mp-nombre" type="text" placeholder="Ej: Croquetas de jamón">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Categoría *</label>
+      <input class="form-input" id="mp-cat" type="text" placeholder="Ej: Entrantes, Carnes, Postres…" list="cats-list">
+      <datalist id="cats-list"></datalist>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Alérgenos que contiene</label>
+      <div class="ale-checks" id="mp-ale-checks"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="cerrarModal('overlay-plato')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarPlato()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MODAL INGREDIENTE ═══════ -->
+<div class="overlay" id="overlay-ing" onclick="cerrarOverlay(event,'overlay-ing')">
+  <div class="modal">
+    <h3 id="mi-titulo">Añadir ingrediente</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Nombre del ingrediente *</label>
+        <input class="form-input" id="mi-nombre" type="text" placeholder="Ej: Mantequilla">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Familia *</label>
+        <select class="form-input" id="mi-familia"></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Marca (opcional)</label>
+        <input class="form-input" id="mi-marca" type="text" placeholder="Ej: Anchor, Hacendado…">
+      </div>
+      <div class="form-group">
+        <label class="form-label">¿Viene envasado?</label>
+        <div class="radio-group" id="mi-envasado">
+          <label class="radio-opt sel" id="env-si" onclick="selEnv('si')">
+            <input type="radio" name="env" value="si" checked> ✅ Sí
+          </label>
+          <label class="radio-opt" id="env-no" onclick="selEnv('no')">
+            <input type="radio" name="env" value="no"> 📦 No
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Alérgenos que contiene</label>
+      <div class="ale-checks" id="mi-ale-checks"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="cerrarModal('overlay-ing')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarIngrediente()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+//  CONSTANTES
+// ════════════════════════════════════════════
+const ALERGENOS = [
+  { id:'gluten',       nombre:'Gluten',       emoji:'🌾', color:'#C0392B' },
+  { id:'lacteos',      nombre:'Lácteos',       emoji:'🥛', color:'#2980B9' },
+  { id:'huevos',       nombre:'Huevos',        emoji:'🥚', color:'#E8A020' },
+  { id:'pescado',      nombre:'Pescado',        emoji:'🐟', color:'#1ABC9C' },
+  { id:'marisco',      nombre:'Marisco',        emoji:'🦐', color:'#E74C3C' },
+  { id:'frutos_secos', nombre:'Frutos secos',   emoji:'🥜', color:'#7D3C98' },
+  { id:'cacahuetes',   nombre:'Cacahuetes',     emoji:'🤎', color:'#A04000' },
+  { id:'soja',         nombre:'Soja',           emoji:'🫘', color:'#1E8449' },
+  { id:'apio',         nombre:'Apio',           emoji:'🥬', color:'#148F77' },
+  { id:'mostaza',      nombre:'Mostaza',        emoji:'🌻', color:'#B7950B' },
+  { id:'sesamo',       nombre:'Sésamo',         emoji:'🌰', color:'#CA6F1E' },
+  { id:'sulfitos',     nombre:'Sulfitos',       emoji:'🍷', color:'#76448A' },
+  { id:'altramuces',   nombre:'Altramuces',     emoji:'💛', color:'#1D8348' },
+  { id:'moluscos',     nombre:'Moluscos',       emoji:'🐚', color:'#1A5276' },
+];
+
+// ════════════════════════════════════════════
+//  STORAGE
+// ════════════════════════════════════════════
+const DEMO_PLATOS = [
+  { id:1, nombre:'Gazpacho andaluz',    categoria:'Entrantes', alergenos:['apio'] },
+  { id:2, nombre:'Croquetas de jamón',  categoria:'Entrantes', alergenos:['gluten','lacteos','huevos'] },
+  { id:3, nombre:'Ensalada César',      categoria:'Ensaladas', alergenos:['gluten','lacteos','huevos','pescado','mostaza'] },
+  { id:4, nombre:'Ensalada de la casa', categoria:'Ensaladas', alergenos:[] },
+  { id:5, nombre:'Lubina a la plancha', categoria:'Pescados',  alergenos:['pescado'] },
+  { id:6, nombre:'Gambas al ajillo',    categoria:'Mariscos',  alergenos:['marisco','sulfitos'] },
+  { id:7, nombre:'Lasaña de carne',     categoria:'Pastas',    alergenos:['gluten','lacteos','huevos'] },
+  { id:8, nombre:'Tiramisú',            categoria:'Postres',   alergenos:['gluten','lacteos','huevos'] },
+  { id:9, nombre:'Sorbete de limón',    categoria:'Postres',   alergenos:[] },
+];
+const DEMO_FAMILIAS = ['Lácteos','Carnes y aves','Pescados y mariscos','Verduras y hortalizas','Cereales','Salsas y condimentos','Huevos','Aceites y grasas'];
+const DEMO_ING = [
+  { id:1, nombre:'Mantequilla',        familia:'Lácteos',              marca:'Anchor',    envasado:true,  alergenos:['lacteos'] },
+  { id:2, nombre:'Leche entera',       familia:'Lácteos',              marca:'Pascual',   envasado:true,  alergenos:['lacteos'] },
+  { id:3, nombre:'Queso parmesano',    familia:'Lácteos',              marca:'Grana Padano', envasado:true, alergenos:['lacteos'] },
+  { id:4, nombre:'Pechuga de pollo',   familia:'Carnes y aves',        marca:'',          envasado:false, alergenos:[] },
+  { id:5, nombre:'Solomillo de ternera','familia':'Carnes y aves',     marca:'',          envasado:false, alergenos:[] },
+  { id:6, nombre:'Lubina fresca',      familia:'Pescados y mariscos',  marca:'',          envasado:false, alergenos:['pescado'] },
+  { id:7, nombre:'Gambas peladas',     familia:'Pescados y mariscos',  marca:'Pescanova', envasado:true,  alergenos:['marisco'] },
+  { id:8, nombre:'Harina de trigo',    familia:'Cereales',             marca:'Gallo',     envasado:true,  alergenos:['gluten'] },
+  { id:9, nombre:'Pan rallado',        familia:'Cereales',             marca:'Bimbo',     envasado:true,  alergenos:['gluten','huevos'] },
+  { id:10,nombre:'Salsa de soja',      familia:'Salsas y condimentos', marca:'Kikkoman',  envasado:true,  alergenos:['soja','gluten'] },
+  { id:11,nombre:'Mostaza de Dijon',   familia:'Salsas y condimentos', marca:'Maille',    envasado:true,  alergenos:['mostaza'] },
+  { id:12,nombre:'Tomate cherry',      familia:'Verduras y hortalizas',marca:'',          envasado:false, alergenos:[] },
+];
+
+function load(key, def) { try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : def; } catch { return def; } }
+function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+let platos   = load('ale_platos',   DEMO_PLATOS);
+let familias = load('ale_familias', DEMO_FAMILIAS);
+let ingredientes = load('ale_ing',  DEMO_ING);
+let nextPId = Math.max(...platos.map(p=>p.id), 0) + 1;
+let nextIId = Math.max(...ingredientes.map(i=>i.id), 0) + 1;
+
+let platoActivo    = null;
+let alergenoActivo = null;
+let modoAdmin      = false;
+let editPlatoId    = null;
+let editIngId      = null;
+let famFiltro      = 'todas';
+
+// ════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════
+const getAle = id => ALERGENOS.find(a => a.id === id);
+const badgeHTML = id => { const a=getAle(id); return a?`<span class="badge" style="background:${a.color}">${a.emoji} ${a.nombre}</span>`:''; };
+
+// ════════════════════════════════════════════
+//  MODO / TABS
+// ════════════════════════════════════════════
+function toggleMode() {
+  modoAdmin = !modoAdmin;
+  const pill = document.getElementById('mode-toggle');
+  document.getElementById('mode-label').textContent = modoAdmin ? 'Modo administración' : 'Modo consulta';
+  pill.classList.toggle('admin-active', modoAdmin);
+  ['tab-ap','tab-ai','tab-af'].forEach(id => document.getElementById(id).classList.toggle('hidden', !modoAdmin));
+  showTab(modoAdmin ? 'admin-platos' : 'platos');
+}
+
+function showTab(tab) {
+  const allTabs = ['platos','ingredientes','admin-platos','admin-ing','admin-familias'];
+  document.querySelectorAll('.tab').forEach((el, i) => el.classList.toggle('active', allTabs[i] === tab));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-'+tab).classList.add('active');
+  if (tab==='platos')         { renderPlatos(); renderAleSelector(); }
+  if (tab==='ingredientes')   { renderIngredientes(); renderFamTabs(); }
+  if (tab==='admin-platos')   renderAdminPlatos();
+  if (tab==='admin-ing')      renderAdminIng();
+  if (tab==='admin-familias') renderAdminFamilias();
+}
+
+// ════════════════════════════════════════════
+//  CONSULTA: PLATOS
+// ════════════════════════════════════════════
+function renderPlatos() {
+  const q = (document.getElementById('q-platos').value||'').toLowerCase();
+  const lista = platos.filter(p => p.nombre.toLowerCase().includes(q) || p.categoria.toLowerCase().includes(q));
+  const c = document.getElementById('lista-platos');
+  if (!lista.length) { c.innerHTML='<div class="empty-state">No se encontraron platos</div>'; return; }
+  c.innerHTML = lista.map(p => {
+    const b = p.alergenos.length ? p.alergenos.map(badgeHTML).join('') : '<span class="sin-ale">✓ Sin alérgenos</span>';
+    return `<div class="plato-card ${platoActivo===p.id?'active':''}" onclick="selPlato(${p.id})">
+      <div class="plato-cat">${p.categoria}</div>
+      <div class="plato-nom">${p.nombre}</div>
+      <div class="badges">${b}</div>
+    </div>`;
+  }).join('');
+}
+
+function selPlato(id) {
+  platoActivo = platoActivo===id ? null : id;
+  renderPlatos();
+  const det = document.getElementById('detalle-plato');
+  if (!platoActivo) { det.style.display='none'; return; }
+  const p = platos.find(x=>x.id===id);
+  det.style.display='block';
+  document.getElementById('det-nombre').textContent = p.nombre;
+  document.getElementById('det-cat').textContent = p.categoria;
+  const pres = ALERGENOS.filter(a=>p.alergenos.includes(a.id));
+  const aus  = ALERGENOS.filter(a=>!p.alergenos.includes(a.id));
+  document.getElementById('det-grid').innerHTML = !pres.length
+    ? `<div style="grid-column:1/-1"><span class="sin-ale" style="font-size:0.8rem;padding:7px 12px">✓ No contiene ninguno de los 14 alérgenos de declaración obligatoria</span></div>`
+    : pres.map(a=>`<div class="ale-pill" style="background:${a.color}22;color:${a.color};border:1.5px solid ${a.color}44"><div class="ale-dot" style="background:${a.color}"></div>${a.emoji} ${a.nombre}</div>`).join('')
+      + (aus.length ? `<div style="grid-column:1/-1;margin-top:8px" class="sec-label">NO CONTIENE</div>`
+        + aus.map(a=>`<div class="ale-pill ausente"><div class="ale-dot" style="background:#CCC"></div>${a.emoji} ${a.nombre}</div>`).join('') : '');
+  det.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function renderAleSelector() {
+  document.getElementById('ale-selector').innerHTML = ALERGENOS.map(a=>
+    `<button class="ale-btn ${alergenoActivo===a.id?'sel':''}"
+      style="${alergenoActivo===a.id?`background:${a.color};`:`color:${a.color};`}"
+      onclick="selAlergeno('${a.id}')">
+      <div class="bdot" style="background:${a.color};${alergenoActivo===a.id?'opacity:0.45':''}"></div>
+      ${a.emoji} ${a.nombre}
+    </button>`).join('');
+}
+
+function selAlergeno(id) {
+  alergenoActivo = alergenoActivo===id ? null : id;
+  renderAleSelector();
+  const c = document.getElementById('res-alergeno');
+  if (!alergenoActivo) { c.innerHTML='<div class="empty-state">Selecciona un alérgeno para ver los platos afectados</div>'; return; }
+  const a = getAle(id);
+  const con = platos.filter(p=>p.alergenos.includes(id));
+  const sin = platos.filter(p=>!p.alergenos.includes(id));
+  let html = `<div class="res-title">Platos con ${a.emoji} ${a.nombre}<span class="cnt-badge">${con.length}</span></div>`;
+  if (!con.length) html += `<div class="empty-state" style="padding:14px 0;color:var(--green);font-weight:600">✓ Ningún plato contiene este alérgeno</div>`;
+  else html += con.map(p=>`<div class="plato-row"><div><div class="nom">${p.nombre}</div><div class="cat2">${p.categoria}</div></div><div class="badges">${p.alergenos.filter(x=>x!==id).map(badgeHTML).join('')}</div></div>`).join('');
+  html += `<div class="sec-label" style="margin-top:16px">Sin este alérgeno (${sin.length})</div>`;
+  html += sin.map(p=>`<div class="plato-row" style="opacity:0.4"><div><div class="nom">${p.nombre}</div><div class="cat2">${p.categoria}</div></div></div>`).join('');
+  c.innerHTML = html;
+}
+
+// ════════════════════════════════════════════
+//  CONSULTA: INGREDIENTES
+// ════════════════════════════════════════════
+function renderFamTabs() {
+  const c = document.getElementById('familia-tabs-consulta');
+  const fams = ['todas', ...familias.sort()];
+  c.innerHTML = fams.map(f=>
+    `<div class="ftab ${famFiltro===f?'active':''}" onclick="setFamFiltro('${f}')">${f==='todas'?'Todas las familias':f}</div>`
+  ).join('');
+}
+
+function setFamFiltro(f) { famFiltro=f; renderFamTabs(); renderIngredientes(); }
+
+function renderIngredientes() {
+  const q = (document.getElementById('q-ing').value||'').toLowerCase();
+  let lista = ingredientes.filter(i =>
+    i.nombre.toLowerCase().includes(q) || (i.marca||'').toLowerCase().includes(q)
+  );
+  if (famFiltro !== 'todas') lista = lista.filter(i => i.familia === famFiltro);
+  lista.sort((a,b) => a.nombre.localeCompare(b.nombre));
+  const c = document.getElementById('ing-grid');
+  if (!lista.length) { c.innerHTML='<div class="empty-state" style="grid-column:1/-1">No se encontraron ingredientes</div>'; return; }
+  c.innerHTML = lista.map(i => {
+    const ales = i.alergenos.length ? i.alergenos.map(badgeHTML).join('') : '<span class="sin-ale">✓ Sin alérgenos</span>';
+    const marcaTag = i.marca ? `<span class="tag-marca">🏷 ${i.marca}</span>` : '';
+    const envTag = `<span class="tag-env ${i.envasado?'si':'no'}">${i.envasado?'📦 Envasado':'🔓 No envasado'}</span>`;
+    return `<div class="ing-card">
+      <div class="ing-header">
+        <div>
+          <div class="ing-nombre">${i.nombre}</div>
+          <div class="ing-familia">${i.familia||'Sin familia'}</div>
+        </div>
+        <div class="ing-tags">${marcaTag}${envTag}</div>
+      </div>
+      <div class="ing-ales">${ales}</div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════
+//  ADMIN: PLATOS
+// ════════════════════════════════════════════
+function renderAdminPlatos() {
+  // datalist categorías
+  const cats = [...new Set(platos.map(p=>p.categoria))].sort();
+  document.getElementById('cats-list').innerHTML = cats.map(c=>`<option value="${c}">`).join('');
+  const c = document.getElementById('admin-platos-content');
+  if (!platos.length) { c.innerHTML='<div class="admin-empty">Todavía no hay platos. Añade el primero.</div>'; return; }
+  let html = '<table class="admin-table"><thead><tr><th>Plato</th><th>Categoría</th><th>Alérgenos</th><th></th></tr></thead><tbody>';
+  [...new Set(platos.map(p=>p.categoria))].sort().forEach(cat => {
+    platos.filter(p=>p.categoria===cat).forEach(p => {
+      const b = p.alergenos.length ? p.alergenos.map(badgeHTML).join('') : '<span class="sin-ale">Sin alérgenos</span>';
+      html += `<tr><td><strong>${p.nombre}</strong></td><td style="color:var(--text-muted);font-size:0.8rem">${cat}</td>
+        <td><div class="badges">${b}</div></td>
+        <td><div class="td-acc"><button class="btn-edit" onclick="abrirModalPlato(${p.id})">✏️ Editar</button><button class="btn-danger" onclick="eliminarPlato(${p.id})">🗑</button></div></td></tr>`;
+    });
+  });
+  html += '</tbody></table>';
+  c.innerHTML = html;
+}
+
+function abrirModalPlato(id=null) {
+  editPlatoId = id;
+  const p = id ? platos.find(x=>x.id===id) : null;
+  document.getElementById('mp-titulo').textContent = p ? 'Editar plato' : 'Añadir plato';
+  document.getElementById('mp-nombre').value = p ? p.nombre : '';
+  document.getElementById('mp-cat').value = p ? p.categoria : '';
+  buildChecks('mp-ale-checks', p ? p.alergenos : []);
+  document.getElementById('overlay-plato').classList.add('open');
+}
+
+function guardarPlato() {
+  const nombre = document.getElementById('mp-nombre').value.trim();
+  const cat    = document.getElementById('mp-cat').value.trim();
+  if (!nombre||!cat) { alert('El nombre y la categoría son obligatorios.'); return; }
+  const ales = ALERGENOS.filter(a=>document.getElementById('mpcb-'+a.id).checked).map(a=>a.id);
+  if (editPlatoId) {
+    const i = platos.findIndex(p=>p.id===editPlatoId);
+    platos[i] = {id:editPlatoId, nombre, categoria:cat, alergenos:ales};
+  } else {
+    platos.push({id:nextPId++, nombre, categoria:cat, alergenos:ales});
+  }
+  save('ale_platos', platos);
+  cerrarModal('overlay-plato');
+  renderAdminPlatos();
+}
+
+function eliminarPlato(id) {
+  const p = platos.find(x=>x.id===id);
+  if (!confirm(`¿Eliminar "${p.nombre}"?`)) return;
+  platos = platos.filter(x=>x.id!==id);
+  if (platoActivo===id) { platoActivo=null; document.getElementById('detalle-plato').style.display='none'; }
+  save('ale_platos', platos);
+  renderAdminPlatos();
+}
+
+// ════════════════════════════════════════════
+//  ADMIN: INGREDIENTES
+// ════════════════════════════════════════════
+function renderAdminIng() {
+  const c = document.getElementById('admin-ing-content');
+  if (!ingredientes.length) { c.innerHTML='<div class="admin-empty">Todavía no hay ingredientes. Añade el primero.</div>'; return; }
+  const fams = [...new Set(ingredientes.map(i=>i.familia||'Sin familia'))].sort();
+  let html = '';
+  fams.forEach(fam => {
+    const grupo = ingredientes.filter(i=>(i.familia||'Sin familia')===fam);
+    html += `<div style="margin-bottom:28px">
+      <div style="font-family:'DM Serif Display',serif;font-size:1rem;margin-bottom:10px;padding-bottom:6px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <span>${fam} <span style="font-family:'DM Sans',sans-serif;font-size:0.72rem;color:var(--text-muted);font-weight:400">(${grupo.length})</span></span>
+      </div>
+      <table class="admin-table"><thead><tr><th>Ingrediente</th><th>Marca</th><th>Envasado</th><th>Alérgenos</th><th></th></tr></thead><tbody>`;
+    grupo.sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(i => {
+      const b = i.alergenos.length ? i.alergenos.map(badgeHTML).join('') : '<span class="sin-ale">Sin alérgenos</span>';
+      html += `<tr>
+        <td><strong>${i.nombre}</strong></td>
+        <td style="color:var(--text-muted);font-size:0.78rem">${i.marca||'—'}</td>
+        <td><span class="tag-env ${i.envasado?'si':'no'}" style="font-size:0.72rem;padding:2px 8px;border-radius:20px;font-weight:500">${i.envasado?'📦 Sí':'🔓 No'}</span></td>
+        <td><div class="badges">${b}</div></td>
+        <td><div class="td-acc"><button class="btn-edit" onclick="abrirModalIng(${i.id})">✏️ Editar</button><button class="btn-danger" onclick="eliminarIng(${i.id})">🗑</button></div></td>
+      </tr>`;
+    });
+    html += '</tbody></table></div>';
+  });
+  c.innerHTML = html;
+}
+
+function abrirModalIng(id=null) {
+  editIngId = id;
+  const i = id ? ingredientes.find(x=>x.id===id) : null;
+  document.getElementById('mi-titulo').textContent = i ? 'Editar ingrediente' : 'Añadir ingrediente';
+  document.getElementById('mi-nombre').value = i ? i.nombre : '';
+  document.getElementById('mi-marca').value  = i ? (i.marca||'') : '';
+  // familias
+  const fsel = document.getElementById('mi-familia');
+  fsel.innerHTML = familias.sort().map(f=>`<option value="${f}" ${i&&i.familia===f?'selected':''}>${f}</option>`).join('');
+  // envasado
+  selEnv(i ? (i.envasado?'si':'no') : 'si');
+  buildChecks('mi-ale-checks', i ? i.alergenos : [], 'micb-');
+  document.getElementById('overlay-ing').classList.add('open');
+}
+
+function selEnv(val) {
+  document.getElementById('env-si').className = 'radio-opt' + (val==='si'?' sel':'');
+  document.getElementById('env-no').className = 'radio-opt' + (val==='no'?' sel-no':'');
+  document.querySelector('input[value="si"]').checked = val==='si';
+  document.querySelector('input[value="no"]').checked = val==='no';
+}
+
+function guardarIngrediente() {
+  const nombre   = document.getElementById('mi-nombre').value.trim();
+  const familia  = document.getElementById('mi-familia').value;
+  const marca    = document.getElementById('mi-marca').value.trim();
+  const envasado = document.querySelector('input[name="env"]:checked').value === 'si';
+  if (!nombre) { alert('El nombre del ingrediente es obligatorio.'); return; }
+  const ales = ALERGENOS.filter(a=>document.getElementById('micb-'+a.id).checked).map(a=>a.id);
+  const obj = {nombre, familia, marca, envasado, alergenos:ales};
+  if (editIngId) {
+    const idx = ingredientes.findIndex(x=>x.id===editIngId);
+    ingredientes[idx] = {...obj, id:editIngId};
+  } else {
+    ingredientes.push({...obj, id:nextIId++});
+  }
+  save('ale_ing', ingredientes);
+  cerrarModal('overlay-ing');
+  renderAdminIng();
+}
+
+function eliminarIng(id) {
+  const i = ingredientes.find(x=>x.id===id);
+  if (!confirm(`¿Eliminar "${i.nombre}"?`)) return;
+  ingredientes = ingredientes.filter(x=>x.id!==id);
+  save('ale_ing', ingredientes);
+  renderAdminIng();
+}
+
+// ════════════════════════════════════════════
+//  ADMIN: FAMILIAS
+// ════════════════════════════════════════════
+function renderAdminFamilias() {
+  const c = document.getElementById('familias-list');
+  if (!familias.length) { c.innerHTML='<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px">No hay familias todavía. Crea la primera abajo.</p>'; return; }
+  c.innerHTML = familias.sort().map(f => {
+    const n = ingredientes.filter(i=>i.familia===f).length;
+    return `<div class="familia-chip">
+      <span>📁 ${f}</span>
+      <span style="font-size:0.7rem;color:var(--text-muted)">${n} ingrediente${n!==1?'s':''}</span>
+      <button onclick="eliminarFamilia('${f.replace(/'/g,"\\'")}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function agregarFamilia() {
+  const input = document.getElementById('nueva-familia');
+  const val = input.value.trim();
+  if (!val) return;
+  if (familias.map(f=>f.toLowerCase()).includes(val.toLowerCase())) { alert('Esa familia ya existe.'); return; }
+  familias.push(val);
+  familias.sort();
+  save('ale_familias', familias);
+  input.value = '';
+  renderAdminFamilias();
+}
+
+function eliminarFamilia(nombre) {
+  const n = ingredientes.filter(i=>i.familia===nombre).length;
+  const msg = n ? `¿Eliminar la familia "${nombre}"? Los ${n} ingredientes de esta familia pasarán a "Sin familia".` : `¿Eliminar la familia "${nombre}"?`;
+  if (!confirm(msg)) return;
+  ingredientes = ingredientes.map(i => i.familia===nombre ? {...i, familia:''} : i);
+  familias = familias.filter(f=>f!==nombre);
+  save('ale_familias', familias);
+  save('ale_ing', ingredientes);
+  renderAdminFamilias();
+}
+
+// ════════════════════════════════════════════
+//  MODAL UTILS
+// ════════════════════════════════════════════
+function buildChecks(containerId, sel=[], prefix='mpcb-') {
+  document.getElementById(containerId).innerHTML = ALERGENOS.map(a => {
+    const checked = sel.includes(a.id);
+    return `<label class="ale-check-item ${checked?'checked':''}" id="${prefix}lbl-${a.id}"
+      style="${checked?`background:${a.color};border-color:${a.color};color:white`:''}"
+      onclick="toggleCheck('${a.id}','${a.color}','${prefix}')">
+      <input type="checkbox" id="${prefix}${a.id}" ${checked?'checked':''}>
+      ${a.emoji} ${a.nombre}
+    </label>`;
+  }).join('');
+}
+
+function toggleCheck(id, color, prefix) {
+  const cb  = document.getElementById(prefix+id);
+  const lbl = document.getElementById(prefix+'lbl-'+id);
+  cb.checked = !cb.checked;
+  if (cb.checked) { lbl.classList.add('checked'); lbl.style.cssText=`background:${color};border-color:${color};color:white`; }
+  else            { lbl.classList.remove('checked'); lbl.style.cssText=''; }
+}
+
+function cerrarModal(oid) { document.getElementById(oid).classList.remove('open'); editPlatoId=null; editIngId=null; }
+function cerrarOverlay(e, oid) { if (e.target===document.getElementById(oid)) cerrarModal(oid); }
+
+// ════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════
+renderPlatos();
+renderAleSelector();
+</script>
+</body>
+</html>
